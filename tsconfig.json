@@ -1,0 +1,59 @@
+// Base TypeScript configuration for the ApexFuel monorepo.
+// Individual packages and apps (apps/web, apps/api) should extend this file.
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "ApexFuel Monorepo Base",
+  "compilerOptions": {
+    /* Language and Module Resolution */
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "preserve",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    
+    /* Emit and Build Performance */
+    "incremental": true,
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "noEmit": true,
+    
+    /* Strict Type Checking */
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    
+    /* Interop and Consistency */
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    
+    /* Monorepo Path Aliases */
+    "baseUrl": ".",
+    "paths": {
+      "@apexfuel/database": ["./packages/database/src/index.ts"],
+      "@apexfuel/types": ["./packages/types/src/index.ts"]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    ".next",
+    "out",
+    "coverage"
+  ]
+}

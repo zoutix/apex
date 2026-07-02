@@ -1,0 +1,19 @@
+
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "noEmit": false,
+    "strictPropertyInitialization": false,
+    "paths": {
+      "@apexfuel/database": ["../../packages/database/src/index.ts"],
+      "@apexfuel/types": ["../../packages/types/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

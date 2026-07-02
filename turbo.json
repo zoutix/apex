@@ -1,0 +1,123 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [
+    "**/.env.*local",
+    "tsconfig.json",
+    "turbo.json"
+  ],
+  "globalEnv": [
+    "NODE_ENV",
+    "DATABASE_URL",
+    "JWT_SECRET",
+    "REDIS_URL",
+    "AWS_ACCESS_KEY_ID",
+    "AWS_SECRET_ACCESS_KEY",
+    "AWS_REGION",
+    "AWS_S3_BUCKET",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "APPLE_CLIENT_ID",
+    "APPLE_TEAM_ID",
+    "APPLE_KEY_ID",
+    "APPLE_PRIVATE_KEY",
+    "NEXT_PUBLIC_API_URL",
+    "NEXT_PUBLIC_GOOGLE_CLIENT_ID",
+    "PORT"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": [
+        "^build",
+        "^db:generate"
+      ],
+      "inputs": [
+        "src/**",
+        "public/**",
+        "package.json",
+        "tsconfig.json",
+        "tsconfig.build.json",
+        "next.config.mjs",
+        "next.config.js",
+        "nest-cli.json",
+        "tailwind.config.ts",
+        "tailwind.config.js",
+        "postcss.config.js",
+        "postcss.config.mjs"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "dist/**",
+        "build/**"
+      ],
+      "env": [
+        "NEXT_PUBLIC_API_URL",
+        "NEXT_PUBLIC_GOOGLE_CLIENT_ID",
+        "DATABASE_URL",
+        "JWT_SECRET",
+        "PORT"
+      ]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**",
+        "package.json",
+        "tsconfig.json",
+        ".eslintrc.cjs",
+        ".eslintrc.js",
+        "eslint.config.mjs"
+      ],
+      "outputs": []
+    },
+    "typecheck": {
+      "dependsOn": [
+        "^build",
+        "^db:generate"
+      ],
+      "inputs": [
+        "src/**",
+        "package.json",
+        "tsconfig.json",
+        "tsconfig.build.json"
+      ],
+      "outputs": []
+    },
+    "db:generate": {
+      "cache": true,
+      "inputs": [
+        "prisma/schema.prisma",
+        "package.json"
+      ],
+      "outputs": [
+        "node_modules/.prisma/**",
+        "node_modules/@prisma/client/**"
+      ]
+    },
+    "db:migrate": {
+      "cache": false,
+      "inputs": [
+        "prisma/schema.prisma",
+        "prisma/migrations/**"
+      ]
+    },
+    "db:seed": {
+      "cache": false,
+      "inputs": [
+        "prisma/seed.ts",
+        "prisma/seed.js",
+        "package.json"
+      ]
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}

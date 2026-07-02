@@ -1,0 +1,283 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum ActivityLevel {
+  SEDENTARY
+  LIGHTLY_ACTIVE
+  MODERATELY_ACTIVE
+  VERY_ACTIVE
+  EXTRA_ACTIVE
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+}
+
+enum ExerciseType {
+  STRENGTH
+  CARDIO
+  FLEXIBILITY
+  CUSTOM
+}
+
+model User {
+  id              String        @id @default(uuid())
+  email           String        @unique
+  passwordHash    String?
+  firstName       String?
+  lastName        String?
+  avatarUrl       String?
+  role            String        @default("USER")
+  is2FAEnabled    Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  profile         Profile?
+  goals           Goal?
+  dailyLogs       DailyLog[]
+  foods           FoodItem[]
+  exercises       ExerciseLog[]
+  favorites       FavoriteFood[]
+  workouts        Workout[]
+  workoutLogs     WorkoutLog[]
+  customExercises Exercise[]
+  recipes         Recipe[]
+  bodyMetrics     BodyMetric[]
+
+  @@index([email])
+}
+
+model Profile {
+  id             String        @id @default(uuid())
+  userId         String        @unique
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  heightCm       Float?
+  weightKg       Float?
+  gender         Gender?
+  age            Int?
+  activityLevel  ActivityLevel @default(SEDENTARY)
+  targetWeightKg Float?
+  weeklyGoalKg   Float         @default(0.5)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model Goal {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyCalories Int      @default(2000)
+  proteinG      Float    @default(150)
+  carbsG        Float    @default(200)
+  fatG          Float    @default(65)
+  waterMl       Int      @default(2500)
+  stepGoal      Int      @default(10000)
+  updatedAt     DateTime @updatedAt
+}
+
+model FoodItem {
+  id                String             @id @default(uuid())
+  name              String
+  brand             String?
+  barcode           String?            @unique
+  calories          Int
+  proteinG          Float
+  carbsG            Float
+  fatG              Float
+  fiberG            Float?             @default(0)
+  sugarG            Float?             @default(0)
+  sodiumMg          Float?             @default(0)
+  servingSize       Float              @default(100)
+  isVerified        Boolean            @default(false)
+  createdById       String?
+  createdBy         User?              @relation(fields: [createdById], references: [id])
+  mealItems         MealItem[]
+  favorites         FavoriteFood[]
+  recipeIngredients RecipeIngredient[]
+
+  @@index([name])
+  @@index([barcode])
+}
+
+model DailyLog {
+  id           String        @id @default(uuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date         DateTime      @db.Date
+  waterMl      Int           @default(0)
+  steps        Int           @default(0)
+  mealItems    MealItem[]
+  exerciseLogs ExerciseLog[]
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+model MealItem {
+  id         String   @id @default(uuid())
+  dailyLogId String
+  dailyLog   DailyLog @relation(fields: [dailyLogId], references: [id], onDelete: Cascade)
+  foodId     String
+  food       FoodItem @relation(fields: [foodId], references: [id])
+  mealType   MealType
+  servings   Float    @default(1)
+  createdAt  DateTime @default(now())
+}
+
+model ExerciseLog {
+  id             String       @id @default(uuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyLogId     String?
+  dailyLog       DailyLog?    @relation(fields: [dailyLogId], references: [id])
+  name           String
+  type           ExerciseType
+  durationMin    Int
+  caloriesBurned Int
+  createdAt      DateTime     @default(now())
+}
+
+model FavoriteFood {
+  id        String   @id @default(uuid())
+  userId    String
+  foodId    String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  food      FoodItem @relation(fields: [foodId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, foodId])
+  @@index([userId])
+}
+
+model Exercise {
+  id             String            @id @default(uuid())
+  name           String
+  type           ExerciseType
+  muscleGroup    String?
+  metValue       Float?
+  isCustom       Boolean           @default(false)
+  createdById    String?
+  createdBy      User?             @relation(fields: [createdById], references: [id])
+  workoutItems   WorkoutExercise[]
+  workoutSetLogs WorkoutSetLog[]
+
+  @@index([name, type])
+}
+
+model Workout {
+  id          String            @id @default(uuid())
+  userId      String
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  isTemplate  Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  exercises   WorkoutExercise[]
+  logs        WorkoutLog[]
+
+  @@index([userId])
+}
+
+model WorkoutExercise {
+  id          String   @id @default(uuid())
+  workoutId   String
+  workout     Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  exerciseId  String
+  exercise    Exercise @relation(fields: [exerciseId], references: [id])
+  order       Int
+  targetSets  Int?
+  targetReps  Int?
+  restSeconds Int?
+}
+
+model WorkoutLog {
+  id                  String          @id @default(uuid())
+  userId              String
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workoutId           String?
+  workout             Workout?        @relation(fields: [workoutId], references: [id])
+  date                DateTime        @default(now())
+  durationMin         Int
+  totalCaloriesBurned Int
+  notes               String?
+
+  sets                WorkoutSetLog[]
+
+  @@index([userId, date])
+}
+
+model WorkoutSetLog {
+  id           String     @id @default(uuid())
+  workoutLogId String
+  workoutLog   WorkoutLog @relation(fields: [workoutLogId], references: [id], onDelete: Cascade)
+  exerciseId   String
+  exercise     Exercise   @relation(fields: [exerciseId], references: [id])
+  setNumber    Int
+  reps         Int?
+  weightKg     Float?
+  durationSec  Int?
+}
+
+model Recipe {
+  id          String             @id @default(uuid())
+  userId      String
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  servings    Int                @default(1)
+  imageUrl    String?
+  isPublic    Boolean            @default(false)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  ingredients RecipeIngredient[]
+
+  @@index([userId])
+  @@index([isPublic])
+}
+
+model RecipeIngredient {
+  id        String   @id @default(uuid())
+  recipeId  String
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  foodId    String
+  food      FoodItem @relation(fields: [foodId], references: [id])
+  quantityG Float
+}
+
+model BodyMetric {
+  id                String   @id @default(uuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date              DateTime @db.Date
+  weightKg          Float?
+  bodyFatPercentage Float?
+  chestCm           Float?
+  waistCm           Float?
+  armsCm            Float?
+  legsCm            Float?
+  neckCm            Float?
+  hipCm             Float?
+  createdAt         DateTime @default(now())
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
